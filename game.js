@@ -9,6 +9,7 @@
 const rooms = {
     stair: {
         name: "Spiral Stair",
+        short: "Stair",
         description: "Stone steps curl up the inside of the tower, worn hollow in the middle by a century of boots. " +
             "A cold draught comes down from above, carrying the smell of hot brass.",
         exits: { east: "lamp", south: "kitchen" },
@@ -19,6 +20,7 @@ const rooms = {
     },
     lamp: {
         name: "Lamp Room",
+        short: "Lamp",
         description: "The great lens sits in its cradle of gears, throwing slow bars of light out across the water. " +
             "Salt has crusted the seaward windows, and the floor hums faintly under your feet.",
         exits: { west: "stair" },
@@ -30,6 +32,7 @@ const rooms = {
     },
     kitchen: {
         name: "Keeper's Kitchen",
+        short: "Kitchen",
         description: "A kettle stands on the cold stove, and one chair is drawn up to a table scattered with logbooks. " +
             "The door to the rocks bangs gently in its frame, never quite shut.",
         exits: { north: "stair", east: "rocks" },
@@ -40,6 +43,7 @@ const rooms = {
     },
     rocks: {
         name: "The Rocks",
+        short: "Rocks",
         description: "Black wet rock slopes away into the surf, and the tower rises above you into the grey. " +
             "A low door stands open to the west, wedged with a stone so the wind cannot take it.",
         exits: { west: "kitchen" },
@@ -63,6 +67,8 @@ const keys = {
     ArrowLeft: "west",
 };
 const order = ["north", "south", "east", "west"];
+/** Map tiles, in reading order across the 2x2 grid. */
+const layout = ["stair", "lamp", "kitchen", "rocks"];
 let current = "rocks";
 function el(id) {
     const node = document.getElementById(id);
@@ -70,8 +76,33 @@ function el(id) {
         throw new Error("Missing element: " + id);
     return node;
 }
-function render(message) {
+/** Restart a CSS animation that is already on the element. */
+function replay(node, className) {
+    node.classList.remove(className);
+    void node.offsetWidth;
+    node.classList.add(className);
+}
+function buildMap() {
+    const map = el("map");
+    for (const id of layout) {
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.dataset.room = id;
+        tile.innerHTML = '<span class="pip"></span><span class="label">' + rooms[id].short + "</span>";
+        map.appendChild(tile);
+    }
+}
+function paintMap() {
+    const reachable = new Set(Object.values(rooms[current].exits));
+    for (const tile of Array.from(el("map").children)) {
+        const id = tile.dataset.room;
+        tile.classList.toggle("here", id === current);
+        tile.classList.toggle("near", reachable.has(id));
+    }
+}
+function render(message, blocked) {
     const room = rooms[current];
+    document.body.dataset.room = current;
     el("room-name").textContent = room.name;
     el("description").textContent = room.description;
     const exits = el("exits");
@@ -82,22 +113,29 @@ function render(message) {
             continue;
         const item = document.createElement("li");
         item.innerHTML =
-            '<span class="arrow">' + arrows[dir] + "</span> " +
-                '<span class="dir">' + dir + "</span> to the " +
+            '<kbd class="arrow">' + arrows[dir] + "</kbd>" +
+                '<span class="dir">' + dir + "</span>" +
+                '<span class="lead"></span>' +
                 '<span class="place">' + rooms[target].name + "</span>";
         exits.appendChild(item);
     }
-    el("message").textContent = message;
+    paintMap();
+    const note = el("message");
+    note.textContent = message;
+    note.classList.toggle("is-blocked", blocked);
+    replay(note, blocked ? "shake" : "fade");
+    if (!blocked)
+        replay(el("stage"), "swap");
 }
 function move(dir) {
     const room = rooms[current];
     const target = room.exits[dir];
     if (target) {
         current = target;
-        render("You go " + dir + ".");
+        render("You go " + dir + ".", false);
         return;
     }
-    render(room.blocked[dir] ?? "You cannot go that way.");
+    render(room.blocked[dir] ?? "You cannot go that way.", true);
 }
 document.addEventListener("keydown", (event) => {
     const dir = keys[event.key];
@@ -106,4 +144,5 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault();
     move(dir);
 });
-render("The arrow keys move you. Waves break somewhere below.");
+buildMap();
+render("The arrow keys move you. Waves break somewhere below.", false);

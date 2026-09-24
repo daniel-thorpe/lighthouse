@@ -7,20 +7,33 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main>
-  <p class="eyebrow">A small adventure</p>
-  <h1 id="room-name">&nbsp;</h1>
-  <p id="description"></p>
+<div class="beam" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
 
-  <section class="exits">
-    <h2>You can go</h2>
-    <ul id="exits"></ul>
-  </section>
+<main>
+  <p class="eyebrow"><span class="spark" aria-hidden="true"></span> A small adventure</p>
+
+  <div id="stage">
+    <h1 id="room-name">&nbsp;</h1>
+    <p id="description"></p>
+  </div>
+
+  <div class="columns">
+    <section class="exits">
+      <h2>You can go</h2>
+      <ul id="exits"></ul>
+    </section>
+    <section class="mapwrap">
+      <h2>The tower</h2>
+      <div id="map" class="map"></div>
+    </section>
+  </div>
 
   <p id="message" class="message" role="status" aria-live="polite"></p>
 
-  <footer>Use the arrow keys.</footer>
+  <footer>Arrow keys to move</footer>
 </main>
+
 <script src="game.js"></script>
 </body>
 </html>

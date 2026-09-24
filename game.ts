@@ -1,15 +1,17 @@
 type Direction = "north" | "south" | "east" | "west";
 
+type RoomId = "stair" | "lamp" | "kitchen" | "rocks";
+
 interface Room {
   name: string;
+  /** Short label for the map tile. */
+  short: string;
   description: string;
   /** Rooms reachable from here. */
   exits: Partial<Record<Direction, RoomId>>;
   /** Why the remaining directions are not an option. */
   blocked: Partial<Record<Direction, string>>;
 }
-
-type RoomId = "stair" | "lamp" | "kitchen" | "rocks";
 
 /*
   The 2x2 grid, read as a cross-section of the lighthouse:
@@ -21,6 +23,7 @@ type RoomId = "stair" | "lamp" | "kitchen" | "rocks";
 const rooms: Record<RoomId, Room> = {
   stair: {
     name: "Spiral Stair",
+    short: "Stair",
     description:
       "Stone steps curl up the inside of the tower, worn hollow in the middle by a century of boots. " +
       "A cold draught comes down from above, carrying the smell of hot brass.",
@@ -32,6 +35,7 @@ const rooms: Record<RoomId, Room> = {
   },
   lamp: {
     name: "Lamp Room",
+    short: "Lamp",
     description:
       "The great lens sits in its cradle of gears, throwing slow bars of light out across the water. " +
       "Salt has crusted the seaward windows, and the floor hums faintly under your feet.",
@@ -44,6 +48,7 @@ const rooms: Record<RoomId, Room> = {
   },
   kitchen: {
     name: "Keeper's Kitchen",
+    short: "Kitchen",
     description:
       "A kettle stands on the cold stove, and one chair is drawn up to a table scattered with logbooks. " +
       "The door to the rocks bangs gently in its frame, never quite shut.",
@@ -55,6 +60,7 @@ const rooms: Record<RoomId, Room> = {
   },
   rocks: {
     name: "The Rocks",
+    short: "Rocks",
     description:
       "Black wet rock slopes away into the surf, and the tower rises above you into the grey. " +
       "A low door stands open to the west, wedged with a stone so the wind cannot take it.",
@@ -83,6 +89,9 @@ const keys: Record<string, Direction> = {
 
 const order: Direction[] = ["north", "south", "east", "west"];
 
+/** Map tiles, in reading order across the 2x2 grid. */
+const layout: RoomId[] = ["stair", "lamp", "kitchen", "rocks"];
+
 let current: RoomId = "rocks";
 
 function el(id: string): HTMLElement {
@@ -91,9 +100,37 @@ function el(id: string): HTMLElement {
   return node;
 }
 
-function render(message: string): void {
+/** Restart a CSS animation that is already on the element. */
+function replay(node: HTMLElement, className: string): void {
+  node.classList.remove(className);
+  void node.offsetWidth;
+  node.classList.add(className);
+}
+
+function buildMap(): void {
+  const map = el("map");
+  for (const id of layout) {
+    const tile = document.createElement("div");
+    tile.className = "tile";
+    tile.dataset.room = id;
+    tile.innerHTML = '<span class="pip"></span><span class="label">' + rooms[id].short + "</span>";
+    map.appendChild(tile);
+  }
+}
+
+function paintMap(): void {
+  const reachable = new Set<string>(Object.values(rooms[current].exits));
+  for (const tile of Array.from(el("map").children) as HTMLElement[]) {
+    const id = tile.dataset.room as RoomId;
+    tile.classList.toggle("here", id === current);
+    tile.classList.toggle("near", reachable.has(id));
+  }
+}
+
+function render(message: string, blocked: boolean): void {
   const room = rooms[current];
 
+  document.body.dataset.room = current;
   el("room-name").textContent = room.name;
   el("description").textContent = room.description;
 
@@ -104,13 +141,21 @@ function render(message: string): void {
     if (!target) continue;
     const item = document.createElement("li");
     item.innerHTML =
-      '<span class="arrow">' + arrows[dir] + "</span> " +
-      '<span class="dir">' + dir + "</span> to the " +
+      '<kbd class="arrow">' + arrows[dir] + "</kbd>" +
+      '<span class="dir">' + dir + "</span>" +
+      '<span class="lead"></span>' +
       '<span class="place">' + rooms[target].name + "</span>";
     exits.appendChild(item);
   }
 
-  el("message").textContent = message;
+  paintMap();
+
+  const note = el("message");
+  note.textContent = message;
+  note.classList.toggle("is-blocked", blocked);
+  replay(note, blocked ? "shake" : "fade");
+
+  if (!blocked) replay(el("stage"), "swap");
 }
 
 function move(dir: Direction): void {
@@ -119,11 +164,11 @@ function move(dir: Direction): void {
 
   if (target) {
     current = target;
-    render("You go " + dir + ".");
+    render("You go " + dir + ".", false);
     return;
   }
 
-  render(room.blocked[dir] ?? "You cannot go that way.");
+  render(room.blocked[dir] ?? "You cannot go that way.", true);
 }
 
 document.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -133,4 +178,5 @@ document.addEventListener("keydown", (event: KeyboardEvent) => {
   move(dir);
 });
 
-render("The arrow keys move you. Waves break somewhere below.");
+buildMap();
+render("The arrow keys move you. Waves break somewhere below.", false);
