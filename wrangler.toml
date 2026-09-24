@@ -1,0 +1,8 @@
+name = "lighthouse"
+compatibility_date = "2026-09-01"
+
+# No Worker script: this is an assets-only deployment. Wrangler serves
+# everything in ./dist, which the CI build assembles from the compiled
+# game plus the static page.
+[assets]
+directory = "./dist"
