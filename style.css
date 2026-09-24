@@ -1,0 +1,110 @@
+:root {
+  --ink: #e8e3d7;
+  --dim: #8c8879;
+  --glow: #e8b553;
+  --sea: #10161c;
+  --panel: #171e26;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: radial-gradient(ellipse at 50% 0%, #1d2732 0%, var(--sea) 70%);
+  color: var(--ink);
+  font: 16px/1.65 Georgia, "Iowan Old Style", serif;
+}
+
+main {
+  width: 100%;
+  max-width: 34rem;
+  background: var(--panel);
+  border: 1px solid #263140;
+  border-radius: 4px;
+  padding: 2rem 2.25rem 1.5rem;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+h1 {
+  margin: 0.35rem 0 1rem;
+  font-size: 1.85rem;
+  font-weight: normal;
+  letter-spacing: 0.01em;
+  color: var(--glow);
+}
+
+#description {
+  margin: 0 0 1.75rem;
+}
+
+.exits {
+  border-top: 1px solid #263140;
+  padding-top: 1.25rem;
+}
+
+.exits h2 {
+  margin: 0 0 0.6rem;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: normal;
+  color: var(--dim);
+}
+
+#exits {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#exits li {
+  padding: 0.15rem 0;
+}
+
+.arrow {
+  display: inline-block;
+  width: 1.1rem;
+  color: var(--glow);
+}
+
+.dir {
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+
+.place { color: var(--glow); }
+
+.message {
+  min-height: 3.2rem;
+  margin: 1.5rem 0 0;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--glow);
+  color: #cfc9ba;
+  font-style: italic;
+}
+
+footer {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #263140;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
