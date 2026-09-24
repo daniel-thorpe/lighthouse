@@ -1,8 +1,10 @@
+# The Worker name must stay "lighthouse": it is what gives the site its
+# workers.dev hostname, so renaming it would change the live URL.
 name = "lighthouse"
+main = ".open-next/worker.js"
 compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
 
-# No Worker script: this is an assets-only deployment. Wrangler serves
-# everything in ./dist, which the CI build assembles from the compiled
-# game plus the static page.
 [assets]
-directory = "./dist"
+directory = ".open-next/assets"
+binding = "ASSETS"
